@@ -1,0 +1,7 @@
+cookies.cfg
+__pycache__/*
+examples/*
+oldfiles/*
+output_files/*
+.idea/*
+out.*
