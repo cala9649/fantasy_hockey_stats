@@ -2,14 +2,15 @@ import json
 import requests
 import configparser
 
-config = configparser.ConfigParser()
+config = configparser.RawConfigParser()
 config.read('cookies.cfg')
 cookies = {"SWID": config.get('cookies', 'SWID'), "espn_s2": config.get('cookies', 'espn_s2')}
-url_header = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020/segments/0/leagues/{}".format(config.get('league', 'number'))
+url_header = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020/segments/0/leagues/{}".format(
+    config.get('league', 'number'))
 league_base_info_url = url_header + "?view=mMatchupScore&view=mTeam&view=mSettings"
-matchup_url_template = url_header + "?scoringPeriodId={}&view=mBoxscore&view=mMatchupScore&view=mRoster&view=mSettings&view=mStatus&view=mTeam&view=modular&view=mNav"
 
-playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7, 3: "forward", 4: "defense", 5: "goalie", 6: "util", 7: "bench"}
+playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7, 3: "forward", 4: "defense",
+                   5: "goalie", 6: "util", 7: "bench"}
 
 class Team:
     def __init__(self, id, abbrev, loc, nick, ownerId, logo_url):
@@ -91,12 +92,19 @@ class Team:
                     if player in self.roster[pos]:
                         self.mvp['pos'] = playerPositions[pos]
 
+    def calc_daily_score(self, day):
+        score_total = 0
+        for player in self.scores[day]:
+            if player not in self.bench.keys():
+                score_total += self.scores[day][player]
+        return round(score_total, 1)
+
     def calc_total_score(self):
         score_total = 0
         for player in self.scores['total']:
             if player not in self.bench.keys():
                 score_total += self.scores['total'][player]
-        return round(score_total,1)
+        return round(score_total, 1)
 
     def calc_opt_total_score(self):
         opt_score_total = 0
@@ -135,9 +143,9 @@ class League:
             for day in scoringPeriodRange:
                 team.scores[day] = {}
 
-    def build_scores(self, scoringPeriodRange):
+    def build_scores(self, scoringPeriodRange, matchup_day_data):
         for day in scoringPeriodRange:
-            matchup_data = get_daily_stats(day)
+            matchup_data = matchup_day_data[day]
             for matchup_team in matchup_data['teams']:
                 players = matchup_team['roster']['entries']
                 full_roster = []
@@ -177,6 +185,4 @@ class League:
         for team in self.teams:
             team.find_mvp()
 
-def get_daily_stats(day):
-    r = requests.get(matchup_url_template.format(day), cookies=cookies)
-    return json.loads(r.text)
+

@@ -78,18 +78,41 @@ h3 {
 	color: #b0b0b0;
 }
 
-.vs {
-	background: none;
-	padding: 0;
-	vertical-align: middle;
-}
-
 .vs-div {
-	font-size: 25px;
+	font-size: 26px;
 	font-weight: bold;
-	position: relative;
+	position: absolute;
 	width: 0;
-	left: -12px;
+	left: 50%;
+	margin-left: -13px;
+	margin-top: 45px;
 	color: #808080;
 }
 
+.matchup_row {
+    width: 100%;
+    display: block;
+}
+
+.page_break {
+    page-break-before: always;
+}
+
+.matchup_cell_wrapper {
+    padding: 5px;
+    width: 49%;
+}
+
+.matchup_cell_wrapper.away {
+    float: right;
+}
+
+.matchup_cell {
+    padding: 15px;
+    border-radius: 10px;
+    background: white;
+}
+
+.right {
+    float: right;
+}

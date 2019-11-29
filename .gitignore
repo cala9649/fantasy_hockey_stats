@@ -5,3 +5,4 @@ oldfiles/*
 output_files/*
 .idea/*
 out.*
+raw_json/*

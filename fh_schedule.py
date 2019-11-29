@@ -2,7 +2,7 @@ import json
 import requests
 import configparser
 
-config = configparser.ConfigParser()
+config = configparser.RawConfigParser()
 config.read('cookies.cfg')
 cookies = {"SWID": config.get('cookies', 'SWID'), "espn_s2": config.get('cookies', 'espn_s2')}
 
