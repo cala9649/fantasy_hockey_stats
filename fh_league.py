@@ -7,6 +7,7 @@ config.read('cookies.cfg')
 cookies = {"SWID": config.get('cookies', 'SWID'), "espn_s2": config.get('cookies', 'espn_s2')}
 url_header = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020/segments/0/leagues/{}".format(
     config.get('league', 'number'))
+
 league_base_info_url = url_header + "?view=mMatchupScore&view=mTeam&view=mSettings"
 
 playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7, 3: "forward", 4: "defense",

@@ -5,10 +5,10 @@ import fh_statistizer
 import fh_schedule
 
 
-def generate_weekly_report(matchup_number):
+def generate_weekly_report(rep_matchup_num):
     teams = []
     my_league = fh_league.League()
-    week_matchup = fh_matchup.Matchup(matchup_number, my_league.schedule, my_league.settings)
+    week_matchup = fh_matchup.Matchup(rep_matchup_num, my_league.schedule, my_league.settings)
     my_league.build_teams(week_matchup.day_numbers)
     # week_matchup.request_matchup_stats(save_to_file=True)
     week_matchup.load_matchup_stats()
@@ -16,12 +16,14 @@ def generate_weekly_report(matchup_number):
     my_league.find_league_optimum_lineups()
     my_league.find_league_mvps()
     league_luckiness = fh_statistizer.calculate_luckiness(my_league.teams)
-    fh_output.generate_weekly_report(matchup_number, week_matchup, my_league.teams, league_luckiness)
+    weekly_scores = fh_schedule.find_weekly_averages(rep_matchup_num)
+    fh_output.generate_weekly_report(rep_matchup_num, week_matchup, my_league.teams, league_luckiness, weekly_scores)
 
-def make_predictions(matchup_number):
+
+def make_predictions(pred_matchup_num):
     teams = []
     my_league = fh_league.League()
-    week_matchup = fh_matchup.Matchup(matchup_number, my_league.schedule, my_league.settings)
+    week_matchup = fh_matchup.Matchup(pred_matchup_num, my_league.schedule, my_league.settings)
     my_league.build_teams(week_matchup.day_numbers)
     # week_matchup.request_matchup_stats()
     week_matchup.load_matchup_stats()
@@ -35,6 +37,7 @@ def make_predictions(matchup_number):
         print("   vs   ")
         print("{} {} - {}".format(away_team.loc, away_team.nick, fh_schedule.predict_score(away_team, away_num_games)))
         print("\n\n")
+
 
 if __name__ == "__main__":
     matchup_number = 8

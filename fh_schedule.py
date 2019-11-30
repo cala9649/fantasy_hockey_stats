@@ -7,8 +7,29 @@ config.read('cookies.cfg')
 cookies = {"SWID": config.get('cookies', 'SWID'), "espn_s2": config.get('cookies', 'espn_s2')}
 
 pro_team_schedule_url = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020?view=proTeamSchedules_wl"
+matchup_scores_url = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020/segments/0/leagues/{}" \
+                     "?view=mMatchupScore".format(config.get('league', 'number'))
 
-playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7, 3: "forward", 4: "defense", 5: "goalie", 6: "util", 7: "bench"}
+playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7,
+                   3: "forward", 4: "defense", 5: "goalie", 6: "util", 7: "bench"}
+
+
+def find_weekly_averages(current_matchup_num):
+    r = requests.get(matchup_scores_url, cookies=cookies)
+    schedule = r.json()['schedule']
+    team_weekly_scores = {'avg': {}}
+    for team_num in range(1, 9):    # teams are numbered starting at 1 for some reason
+        team_weekly_scores[team_num] = {}
+    for game_num in range(1, current_matchup_num*4):    # games are numbered starting at 1 for some reason
+        for team in ['home', 'away']:
+            team_weekly_scores[schedule[game_num][team]['teamId']][game_num] = schedule[game_num][team]['totalPoints']
+    for team_num in range(1, 9):    # teams are numbered starting at 1 for some reason
+        total_pts = 0
+        for game_num in team_weekly_scores[team_num]:
+            total_pts += team_weekly_scores[team_num][game_num]
+        team_weekly_scores['avg'][team_num] = total_pts / current_matchup_num
+    return team_weekly_scores
+
 
 def predict_score(team, num_games):
     predicted_total = 0
@@ -16,15 +37,16 @@ def predict_score(team, num_games):
         for player in team.roster[pos]:
             if pos != playerPositions['bench']:
                 predicted_total += num_games[player] * team.averages[player]
-    return round(predicted_total,1)
+    return round(predicted_total, 1)
+
 
 def find_num_future_games(team, matchup_days):
     r = requests.get(pro_team_schedule_url)
-    sched_json = json.loads(r.text)
+    sched_json = r.json()
     num_games = {}
     for player in team.raw_player_data:
         pro_team_id = team.raw_player_data[player]['proTeamId']
-        pro_team = ""
+        pro_team = {}
         num_games[player] = 0
         for search_team in sched_json['settings']['proTeams']:
             if search_team['id'] == pro_team_id:

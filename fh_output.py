@@ -126,16 +126,24 @@ def build_player_luck_dist_chart(league_luckiness, home_team, away_team):
     return chart, on_load
 
 
-def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_luckiness):
+def display_averages_html(team_weekly_scores, team_avg):
+    return "<b>Avg Pts/Wk</b>: {}<br>".format(round(team_avg, 1))
+
+
+def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_luckiness, html_weekly_averages):
     row = "<div class='matchup_row'>\n"
     row += "<h1>\n{} - Week {}</h1>".format(league_name, week_num)
     for team in ['away', 'home']:
         row += "<div class='matchup_cell_wrapper {}'>\n".format(team)
         row += "<div class='matchup_cell'>"
-        luck_info = "<b>Luck:</b> {}%\n".format(
+        luck_info = "<b>Luck:</b> <span class='right'>{}%</span>\n".format(
             int(html_league_luckiness[html_teams[matchup[team] - 1].id][0]['mean_luck'] * 100) - 100)
-        max_score_info = "<b>Max: </b>{}\n".format(html_teams[matchup[team] - 1].calc_opt_total_score())
-        team_info_float = "<div class='team-info-float'>\n{}<br>{}\n</div>\n".format(max_score_info, luck_info)
+        max_score_info = "<b>Max: </b><span class='right'>{}</span>" \
+                         "\n".format(html_teams[matchup[team] - 1].calc_opt_total_score())
+        team_avg_info = display_averages_html(html_weekly_averages[matchup[team]], html_weekly_averages['avg'][matchup[team]])
+        team_info_float = "<div class='team-info-float'>\n"
+        team_info_float += "{}<br>{}<br>\n<hr>\n{}\n".format(max_score_info, luck_info, team_avg_info)
+        team_info_float += "</div>\n"
         row += team_info_float
         row += "<img src='{}' class='logo_icon'/>\n".format(html_teams[matchup[team] - 1].logo)
         row += "<h3>\n{} {} [{}]\n</h3>\n".format(html_teams[matchup[team] - 1].loc,
@@ -161,7 +169,6 @@ def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_lu
     chart, on_load = build_daily_score_line_chart(html_teams[matchup['home'] - 1], html_teams[matchup['away'] - 1])
     row += chart
     window_on_load += on_load
-
     row += "</div>\n"
     for team in ['away', 'home']:
         row += "<div class='matchup_cell_wrapper {}'>\n".format(team)
@@ -174,7 +181,7 @@ def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_lu
     return row, window_on_load
 
 
-def format_html(html_week_number, html_week_matchup, html_teams, html_league_luckiness):
+def format_html(html_week_number, html_week_matchup, html_teams, html_league_luckiness, html_weekly_averages):
     html_skeleton = "<html>\n<head>\n<link rel='stylesheet' type='text/css' href='style.css'>\n" \
                     "<script src='Chart.min.js'></script></head>\n<body>\n{}\n</body>\n</html>"
     body_skeleton = "<div id='container'>\n{}</div>\n{}\n"
@@ -183,7 +190,7 @@ def format_html(html_week_number, html_week_matchup, html_teams, html_league_luc
     body = "<div>\n"
     for matchup in html_week_matchup.matchups:
         body_tmp, on_load_tmp = build_matchup_row(matchup, html_week_matchup.name, html_week_number, html_teams,
-                                                  html_league_luckiness)
+                                                  html_league_luckiness, html_weekly_averages)
         body += body_tmp
         window_on_load_vars += on_load_tmp
     body += "</div>\n"
@@ -200,8 +207,8 @@ def format_prediction_html(html_week_number, html_week_matchup, html_teams):
     return "yay"
 
 
-def generate_weekly_report(week_number, week_matchup, teams, league_luckiness):
-    html_output = format_html(week_number, week_matchup, teams, league_luckiness)
+def generate_weekly_report(week_number, week_matchup, teams, league_luckiness, weekly_averages):
+    html_output = format_html(week_number, week_matchup, teams, league_luckiness, weekly_averages)
     # TODO: throws an error if style.css or Chart.min.js is not in /tmp
     pdfkit.from_string(html_output, "out.pdf", options=pdfkit_options)
     with open("out.html", 'w') as f:
