@@ -17,8 +17,9 @@ pdfkit_options = {
 def display_roster_html(html_team):
     roster_skeleton = "\n<div class='player-position'>{}</div>\n<div class='player-names'>{}</div>\n"
     roster_formatted = ""
-    picked_skaters = html_team.roster[3] + html_team.roster[4] + html_team.roster[5] + html_team.roster[6]
-    for pos in [3, 4, 6]:
+    picked_skaters = html_team.roster[playerPositions["forward"]] + html_team.roster[playerPositions["defense"]] \
+                            + html_team.roster[playerPositions["goalie"]] + html_team.roster[playerPositions["util"]]
+    for pos in [playerPositions["forward"], playerPositions["defense"], playerPositions["util"]]:
         skaters_html_list = []
         for player in html_team.opt_roster[pos]:
             if player not in picked_skaters:
@@ -28,14 +29,14 @@ def display_roster_html(html_team):
         roster_formatted += roster_skeleton.format(playerPositions[pos][0].capitalize(), ', '.join(skaters_html_list)
                                                    + "<br>\n")
     goalies_html_list = []
-    for player in html_team.opt_roster[5]:
+    for player in html_team.opt_roster[playerPositions["goalie"]]:
         if player not in picked_skaters:
             goalies_html_list.append("<span class='bad_pick'>{}</span>".format(player))
         else:
             goalies_html_list.append("{}".format(player))
     roster_formatted += roster_skeleton.format("G", ', '.join(goalies_html_list) + "<br>\n")
     bench_html_list = []
-    for player in html_team.opt_roster[7]:
+    for player in html_team.opt_roster[playerPositions["bench"]]:
         if player in picked_skaters:
             bench_html_list.append("<span class='bad_pick'>{} ({})</span>"
                                    .format(player, playerPositions[html_team.opt_bench[player]][0].capitalize()))
@@ -108,7 +109,7 @@ def build_player_luck_dist_chart(league_luckiness, home_team, away_team):
         total = 0
         for i in data:
             total += i
-        data.insert(3, 23-total)
+        data.insert(3, 23 - total)
         chart += "{"
         chart += "label: '{} {}', ".format(team.loc, team.nick)
         if team == home_team:
@@ -141,8 +142,8 @@ def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_lu
         row += team_info_float
         row += "<img src='{}' class='logo_icon'/>\n".format(html_teams[matchup[team] - 1].logo)
         row += "<h3>\n{} {} [{}]\n</h3>\n".format(html_teams[matchup[team] - 1].loc,
-                                                   html_teams[matchup[team] - 1].nick,
-                                                   html_teams[matchup[team] - 1].calc_total_score())
+                                                  html_teams[matchup[team] - 1].nick,
+                                                  html_teams[matchup[team] - 1].calc_total_score())
         row += "<div class='team-highlight'><b>MVP: </b>{} ({}) - {}</div>\n".format(
             html_teams[matchup[team] - 1].mvp['player'], html_teams[matchup[team] - 1].mvp['pos'][0].capitalize(),
             html_teams[matchup[team] - 1].mvp['score'])
