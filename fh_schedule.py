@@ -1,22 +1,11 @@
-import json
-import requests
-import configparser
-
-config = configparser.RawConfigParser()
-config.read('cookies.cfg')
-cookies = {"SWID": config.get('cookies', 'SWID'), "espn_s2": config.get('cookies', 'espn_s2')}
-
-pro_team_schedule_url = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020?view=proTeamSchedules_wl"
-matchup_scores_url = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020/segments/0/leagues/{}" \
-                     "?view=mMatchupScore".format(config.get('league', 'number'))
+import fh_request
 
 playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7,
                    3: "forward", 4: "defense", 5: "goalie", 6: "util", 7: "bench"}
 
 
 def find_weekly_averages(current_matchup_num):
-    r = requests.get(matchup_scores_url, cookies=cookies)
-    schedule = r.json()['schedule']
+    schedule = fh_request.get_matchup_scores()['schedule']
     team_weekly_scores = {'avg': {}}
     for team_num in range(1, 9):    # teams are numbered starting at 1 for some reason
         team_weekly_scores[team_num] = {}
@@ -41,8 +30,7 @@ def predict_score(team, num_games):
 
 
 def find_num_future_games(team, matchup_days):
-    r = requests.get(pro_team_schedule_url)
-    sched_json = r.json()
+    sched_json = fh_request.get_pro_schedule()
     num_games = {}
     for player in team.raw_player_data:
         pro_team_id = team.raw_player_data[player]['proTeamId']

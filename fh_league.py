@@ -1,17 +1,8 @@
-import json
-import requests
-import configparser
-
-config = configparser.RawConfigParser()
-config.read('cookies.cfg')
-cookies = {"SWID": config.get('cookies', 'SWID'), "espn_s2": config.get('cookies', 'espn_s2')}
-url_header = "https://fantasy.espn.com/apis/v3/games/fhl/seasons/2020/segments/0/leagues/{}".format(
-    config.get('league', 'number'))
-
-league_base_info_url = url_header + "?view=mMatchupScore&view=mTeam&view=mSettings"
+import fh_request
 
 playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7, 3: "forward", 4: "defense",
                    5: "goalie", 6: "util", 7: "bench"}
+
 
 class Team:
     def __init__(self, id, abbrev, loc, nick, ownerId, logo_url):
@@ -117,22 +108,17 @@ class Team:
     def __str__(self):
         return "{} {} [{}]\n{}".format(self.loc, self.nick, self.abbrev, {'id': self.id, 'ownerId': self.ownerId, 'owner': self.owner, 'dispName': self.dispName, 'roster': self.roster, 'bench': self.bench, 'util': self.util, 'scores': self.scores})
 
+
 class League:
     def __init__(self):
-        raw_info = self.get_league_info()
+        raw_info = fh_request.get_league_info()
         self.schedule = raw_info['schedule']
         self.settings = raw_info['settings']
         self.teams = []
         self.raw_teams = raw_info['teams']
         self.members = raw_info['members']
 
-    def get_league_info(self):
-        # This might only return the current league info?
-        r = requests.get(league_base_info_url, cookies=cookies)
-        league_info = json.loads(r.text)
-        return league_info
-
-    def build_teams(self, scoringPeriodRange):
+    def build_teams(self, scoring_period_range):
         for team in self.raw_teams:
             self.teams.append(Team(team['id'], team['abbrev'], team['location'], team['nickname'], team['owners'][0], team['logo']))
         for team in self.teams:
@@ -141,11 +127,11 @@ class League:
                     team.dispName = dude['displayName']
                     team.owner = dude['firstName'] + " " + dude['lastName']
                     break
-            for day in scoringPeriodRange:
+            for day in scoring_period_range:
                 team.scores[day] = {}
 
-    def build_scores(self, scoringPeriodRange, matchup_day_data):
-        for day in scoringPeriodRange:
+    def build_scores(self, scoring_period_range, matchup_day_data):
+        for day in scoring_period_range:
             matchup_data = matchup_day_data[day]
             for matchup_team in matchup_data['teams']:
                 players = matchup_team['roster']['entries']
