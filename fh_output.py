@@ -101,15 +101,12 @@ def build_player_luck_dist_chart(league_luckiness, home_team, away_team):
              "options: {responsive: false, aspectRatio: 1.5, animation: {duration: 0}, title: {text: '"
     chart += "Player Luck Distribution"
     chart += "', display: true}, scales: { yAxes: [{ ticks: { suggestedMin: 0, suggestedMax: 20}}]}},\n"
-    chart += "data: { labels: ['-100%', '-50%', '-25%', 'avg', '+25%', '+50%', '+100%'], datasets: ["
+    chart += "data: { labels: ['-75%', '-30%', '-15%', 'avg', '+15%', '+30%', '+75%'], datasets: ["
     for team in [home_team, away_team]:
         team_luck = league_luckiness[team.id][0]
         data = [team_luck['num_extremely_unlucky'], team_luck['num_very_unlucky'], team_luck['num_unlucky'],
                 team_luck['num_lucky'], team_luck['num_very_lucky'], team_luck['num_extremely_lucky']]
-        total = 0
-        for i in data:
-            total += i
-        data.insert(3, 23 - total)
+        data.insert(3, 22 - sum(data))
         chart += "{"
         chart += "label: '{} {}', ".format(team.loc, team.nick)
         if team == home_team:
@@ -156,7 +153,6 @@ def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_lu
         if team == 'away':
             row += "<div class='vs-div'>vs</div>\n"
     row += "</div>\n"
-    # row += "</div>\n"
     row += "<div>\n"
     chart, on_load = build_player_luck_dist_chart(html_league_luckiness, html_teams[matchup['home'] - 1],
                                                   html_teams[matchup['away'] - 1])
@@ -198,6 +194,7 @@ def format_html(html_week_number, html_week_matchup, html_teams, html_league_luc
 
 
 def format_prediction_html(html_week_number, html_week_matchup, html_teams):
+    # TODO: format prediction
     html_skeleton = "<html>\n<head>\n<link rel='stylesheet' type='text/css' href='style.css'>\n" \
                     "</head>\n<body>\n{}</body>\n</html>"
     return "yay"
