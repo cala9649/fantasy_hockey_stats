@@ -6,11 +6,9 @@ import fh_schedule
 
 
 def generate_weekly_report(rep_matchup_num):
-    # teams = []
     my_league = fh_league.League()
     week_matchup = fh_matchup.Matchup(rep_matchup_num, my_league.schedule, my_league.settings)
     my_league.build_teams(week_matchup.day_numbers)
-    # week_matchup.request_matchup_stats(save_to_file=True)
     week_matchup.set_matchup_stats()
     my_league.build_scores(week_matchup.day_numbers, week_matchup.day_data)
     my_league.find_league_optimum_lineups()
@@ -21,12 +19,10 @@ def generate_weekly_report(rep_matchup_num):
 
 
 def make_predictions(pred_matchup_num):
-    teams = []
     my_league = fh_league.League()
     week_matchup = fh_matchup.Matchup(pred_matchup_num, my_league.schedule, my_league.settings)
     my_league.build_teams(week_matchup.day_numbers)
-    # week_matchup.request_matchup_stats()
-    week_matchup.load_matchup_stats()
+    week_matchup.set_matchup_stats()
     my_league.build_scores(week_matchup.day_numbers, week_matchup.day_data)
     for matchup in week_matchup.matchups:
         home_team = my_league.teams[matchup['home']-1]

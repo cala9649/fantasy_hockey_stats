@@ -1,5 +1,7 @@
 import configparser
+from datetime import datetime
 import json
+from os import path
 import requests
 
 config = configparser.RawConfigParser()
@@ -16,26 +18,59 @@ matchup_url_template = url_header + "?scoringPeriodId={}&view=mBoxscore&view=mMa
 league_base_info_url = url_header + "?view=mMatchupScore&view=mTeam&view=mSettings"
 
 
-def get_matchup_scores():
-    return requests.get(matchup_scores_url, cookies=cookies).json()
+def cache_helper(url, filename, authenticated=False, verbose=False):
+    if path.exists(filename):
+        with open(filename, 'r') as f:
+            if verbose:
+                print("Successfully opened {} from cache".format(filename))
+            return json.loads(f.read())
+    else:
+        if authenticated:
+            res = requests.get(url, cookies=cookies)
+        else:
+            res = requests.get(url)
+        if res.status_code == 200:
+            raw_json = res.json()
+            with open(filename, 'w') as f:
+                json.dump(raw_json, f)
+            if verbose:
+                print("Successfully saved {} to cache".format(filename))
+            return raw_json
+        else:
+            print("Error {} -- could not access {}".format(res.status_code, url))
 
 
-def get_pro_schedule():
-    return requests.get(pro_team_schedule_url).json()
+def get_matchup_scores(try_cache=True):
+    if try_cache:
+        day = datetime.now()
+        filename = "raw_json/matchup_scores_from_day_{}".format(day.strftime("%d%m%y"))
+        return cache_helper(matchup_scores_url, filename, authenticated=True, verbose=True)
+    else:
+        return requests.get(matchup_scores_url, cookies=cookies).json()
 
 
-# def request_matchup_stats(save_to_file=False):
-#     for day in self.day_numbers:
-#         get_daily_stats(day, save_to_file)
-#
-
-def get_daily_stats(day, save_to_file=False):
-    # raw_json = json.loads(r.text)
-    # if save_to_file:
-    #     with open('raw_json/day_{}.json'.format(str(day)), 'w') as f:
-    #             json.dump(r.json(), f)
-    return requests.get(matchup_url_template.format(str(day)), cookies=cookies).json()
+def get_pro_schedule(try_cache=True):
+    if try_cache:
+        day = datetime.now()
+        filename = "raw_json/schedule_from_day_{}".format(day.strftime("%d%m%y"))
+        return cache_helper(pro_team_schedule_url, filename, verbose=True)
+    else:
+        return requests.get(pro_team_schedule_url).json()
 
 
-def get_league_info():
-    return requests.get(league_base_info_url, cookies=cookies).json()
+def get_daily_stats(day, try_cache=True):
+    url = matchup_url_template.format(str(day))
+    if try_cache:
+        filename = "raw_json/day_{}.json".format(str(day))
+        return cache_helper(url, filename, authenticated=True, verbose=True)
+    else:
+        return requests.get(url, cookies=cookies).json()
+
+
+def get_league_info(try_cache=True):
+    if try_cache:
+        day = datetime.now()
+        filename = "raw_json/league_info_day_{}".format(day.strftime("%d%m%y"))
+        return cache_helper(league_base_info_url, filename, authenticated=True, verbose=True)
+    else:
+        return requests.get(league_base_info_url, cookies=cookies).json()
