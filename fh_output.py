@@ -101,7 +101,7 @@ def build_player_luck_dist_chart(league_luckiness, home_team, away_team):
              "options: {responsive: false, aspectRatio: 1.5, animation: {duration: 0}, title: {text: '"
     chart += "Player Luck Distribution"
     chart += "', display: true}, scales: { yAxes: [{ ticks: { suggestedMin: 0, suggestedMax: 20}}]}},\n"
-    chart += "data: { labels: ['-75%', '-30%', '-15%', 'avg', '+15%', '+30%', '+75%'], datasets: ["
+    chart += "data: { labels: ['-100%', '-50%', '-25%', 'avg', '+25%', '+50%', '+100%'], datasets: ["
     for team in [home_team, away_team]:
         team_luck = league_luckiness[team.id][0]
         data = [team_luck['num_extremely_unlucky'], team_luck['num_very_unlucky'], team_luck['num_unlucky'],

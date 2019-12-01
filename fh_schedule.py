@@ -44,4 +44,3 @@ def find_num_future_games(team, matchup_days):
             if int(game) in matchup_days:
                 num_games[player] += 1
     return num_games
-

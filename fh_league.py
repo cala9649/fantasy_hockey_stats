@@ -5,23 +5,23 @@ playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 
 
 
 class Team:
-    def __init__(self, id, abbrev, loc, nick, ownerId, logo_url):
-        self.id =       id
-        self.abbrev =   abbrev
-        self.loc =      loc
-        self.nick =     nick
-        self.ownerId =  ownerId
-        self.owner =    ''
+    def __init__(self, team_id, abbrev, loc, nick, owner_id, logo_url):
+        self.id = team_id
+        self.abbrev = abbrev
+        self.loc = loc
+        self.nick = nick
+        self.ownerId = owner_id
+        self.owner = ''
         self.dispName = ''
-        self.roster =   {3: [], 4: [], 5: [], 6: [], 7: []}
-        self.bench =    {}
-        self.util =     {}
-        self.scores =   {'total': {}}
+        self.roster = {3: [], 4: [], 5: [], 6: [], 7: []}
+        self.bench = {}
+        self.util = {}
+        self.scores = {'total': {}}
         self.averages = {}
         self.player_num_games = {}
         self.logo = logo_url
-        self.opt_roster =   {3: [], 4: [], 5: [], 6: [], 7: []}
-        self.opt_bench =    {}
+        self.opt_roster = {3: [], 4: [], 5: [], 6: [], 7: []}
+        self.opt_bench = {}
         self.mvp = {'player': "", 'score': 0, 'pos': ""}
         self.raw_player_data = {}
 
@@ -79,7 +79,7 @@ class Team:
         for player in self.scores['total']:
             if self.scores['total'][player] > self.mvp['score']:
                 self.mvp['player'] = player
-                self.mvp['score'] = round(self.scores['total'][player],1)
+                self.mvp['score'] = round(self.scores['total'][player], 1)
                 for pos in self.roster:
                     if player in self.roster[pos]:
                         self.mvp['pos'] = playerPositions[pos]
@@ -103,10 +103,7 @@ class Team:
         for player in self.scores['total']:
             if player not in self.opt_bench.keys():
                 opt_score_total += self.scores['total'][player]
-        return round(opt_score_total,1)
-
-    def __str__(self):
-        return "{} {} [{}]\n{}".format(self.loc, self.nick, self.abbrev, {'id': self.id, 'ownerId': self.ownerId, 'owner': self.owner, 'dispName': self.dispName, 'roster': self.roster, 'bench': self.bench, 'util': self.util, 'scores': self.scores})
+        return round(opt_score_total, 1)
 
 
 class League:
@@ -120,7 +117,8 @@ class League:
 
     def build_teams(self, scoring_period_range):
         for team in self.raw_teams:
-            self.teams.append(Team(team['id'], team['abbrev'], team['location'], team['nickname'], team['owners'][0], team['logo']))
+            self.teams.append(Team(team['id'], team['abbrev'], team['location'], team['nickname'], team['owners'][0],
+                                   team['logo']))
         for team in self.teams:
             for dude in self.members:
                 if dude['id'] == team.owner:
@@ -171,5 +169,3 @@ class League:
     def find_league_mvps(self):
         for team in self.teams:
             team.find_mvp()
-
-
