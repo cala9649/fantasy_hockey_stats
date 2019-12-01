@@ -1,4 +1,5 @@
 import pdfkit
+from os import path
 
 playerPositions = {"forward": 3, "defense": 4, "goalie": 5, "util": 6, "bench": 7,
                    3: "forward", 4: "defense", 5: "goalie", 6: "util", 7: "bench"}
@@ -210,7 +211,10 @@ def format_prediction_html(html_week_number, html_week_matchup, html_teams):
 def generate_weekly_report(week_number, week_matchup, teams, league_luckiness, weekly_averages):
     html_output = format_html(week_number, week_matchup, teams, league_luckiness, weekly_averages)
     # TODO: throws an error if style.css or Chart.min.js is not in /tmp
-    pdfkit.from_string(html_output, "out.pdf", options=pdfkit_options)
+    if path.exists("/tmp/style.css") and path.exists("/tmp/Chart.min.js"):
+        pdfkit.from_string(html_output, "out.pdf", options=pdfkit_options)
+    else:
+        print("Could not generate PDF. Did not find style.css and Chart.min.js in /tmp")
     with open("out.html", 'w') as f:
         f.write(html_output)
 
