@@ -13,10 +13,9 @@ def generate_weekly_report(rep_matchup_num):
     my_league.build_scores(week_matchup.day_numbers, week_matchup.day_data)
     my_league.find_league_optimum_lineups()
     my_league.find_league_mvps()
-    data = {'league_luckiness': fh_statistizer.calculate_luckiness(my_league.teams),
-            'weekly_averages': fh_schedule.find_weekly_averages(rep_matchup_num)}
-    data['notes'] = fh_statistizer.find_notes(my_league.teams, data['league_luckiness'], data['weekly_averages'])
-    fh_output.generate_weekly_report(rep_matchup_num, week_matchup, my_league.teams, data)
+    league_luckiness = fh_statistizer.calculate_luckiness(my_league.teams)
+    weekly_scores = fh_schedule.find_weekly_averages(rep_matchup_num)
+    fh_output.generate_weekly_report(rep_matchup_num, week_matchup, my_league.teams, league_luckiness, weekly_scores)
 
 
 def make_predictions(pred_matchup_num):
@@ -37,6 +36,6 @@ def make_predictions(pred_matchup_num):
 
 
 if __name__ == "__main__":
-    matchup_number = 9
+    matchup_number = 8
     generate_weekly_report(matchup_number)
     # make_predictions(matchup_number)

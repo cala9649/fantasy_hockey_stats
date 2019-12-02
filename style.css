@@ -116,17 +116,3 @@ h3 {
 .right {
     float: right;
 }
-
-.good_note::before {
-    content: " + ";
-    color: rgb(0, 255, 0);
-    font-weight: bold;
-    font-size: 18px;
-}
-
-.bad_note::before {
-    content: " - ";
-    color: rgb(255, 0, 0);
-    font-weight: bold;
-    font-size: 18px;
-}

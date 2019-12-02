@@ -64,38 +64,3 @@ def calculate_luckiness(teams):
         bench_stats['num_extremely_unlucky'] = len([i for i in bench_players if bench_players[i]['avg'] < 0.4])
         league_luckiness[luck_team.id] = (skating_stats, bench_stats, skating_players, bench_players)
     return league_luckiness
-
-
-def build_note(note_str, result, team_id):
-    return {'note': note_str, 'res': result, 'team': team_id}
-
-
-def find_notes(league_teams, league_luckiness, weekly_averages):
-    notes_list = []
-    for team in league_teams:
-        if team.mvp['player'] in team.bench.keys():                                                   # MVP on the bench
-            notes_list.append(build_note("Team MVP ({}) was on the bench.".format(team.mvp['player']), "bad", team.id))
-        num_bad_picks = len([player for player in team.opt_bench if player not in team.bench])
-        if num_bad_picks >= 5:                                                                             # 5 bad picks
-            notes_list.append(build_note("Every benched player should have been in the lineup", "bad", team.id))
-        team_scores = [score for score in weekly_averages[team.id].values()]
-        if team.calc_total_score() >= max(team_scores):                                   # Team highest ever week score
-            notes_list.append(build_note("Highest ever weekly score!", "good", team.id))
-        if team.calc_total_score() <= min(team_scores):                                  # Team lowest ever weekly score
-            notes_list.append(build_note("Lowest ever weekly score...", "bad", team.id))
-        num_injured_players = len([player for player in team.raw_player_data if team.raw_player_data[player]['injured']
-                           and player not in team.bench])
-        if num_injured_players >= 2:                                                # Played more than 2 injured players
-            notes_list.append(build_note("Played {} injured players".format(num_injured_players), "bad", team.id))
-        num_useless_players = len([player for player in team.scores['total'] if team.scores['total'][player] <= 0
-                                   and player not in team.bench])
-        if num_useless_players >= 2:                                               # Players who scored 0 or less points
-            notes_list.append(build_note("{} players got 0 or fewer points this week".format(num_useless_players),
-                                         "bad", team.id))
-        negative_players = [{'name': player, 'score': team.scores['total'][player]} for player in team.scores['total']
-                            if team.scores['total'][player] < 0 and player not in team.bench]
-        if len(negative_players):                                     # List all players who scored negative in the week
-            for player in negative_players:
-                note = "{} scored negative points this week ({})".format(player['name'], round(player['score'], 1))
-                notes_list.append(build_note(note, "bad", team.id))
-    return notes_list
