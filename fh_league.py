@@ -53,7 +53,8 @@ class Team:
         # Fill fwds, defense, & goalies
         for pos in tmp_roster:
             for player in tmp_roster[pos]:
-                if self.scores['total'][player] >= opt_scores[pos][roster_allowed_per_position[pos]-1]:
+                if self.scores['total'][player] >= opt_scores[pos][roster_allowed_per_position[pos]-1]\
+                        and len(self.opt_roster[pos]) < roster_allowed_per_position[pos]:
                     self.opt_roster[pos].append(player)
                 elif pos in [3, 4]:
                     util_players.append(player)

@@ -141,7 +141,8 @@ def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_lu
             int(html_league_luckiness[html_teams[matchup[team] - 1].id][0]['mean_luck'] * 100) - 100)
         max_score_info = "<b>Max: </b><span class='right'>{}</span>" \
                          "\n".format(html_teams[matchup[team] - 1].calc_opt_total_score())
-        team_avg_info = display_averages_html(html_weekly_averages[matchup[team]], html_weekly_averages['avg'][matchup[team]])
+        team_avg_info = display_averages_html(html_weekly_averages[matchup[team]],
+                                              html_weekly_averages['avg'][matchup[team]])
         team_info_float = "<div class='team-info-float'>\n"
         team_info_float += "{}<br>{}<br>\n<hr>\n{}\n".format(max_score_info, luck_info, team_avg_info)
         team_info_float += "</div>\n"
@@ -178,12 +179,28 @@ def build_matchup_row(matchup, league_name, week_num, html_teams, html_league_lu
         row += display_roster_html(html_teams[matchup[team] - 1])
         row += "</div>"
         row += "</div>"
-    row += "<div class='page_break'></div>"
     return row, window_on_load
 
 
-def format_html(html_week_number, html_week_matchup, html_teams, html_league_luckiness, html_weekly_averages):
-    html_skeleton = "<html>\n<head>\n<link rel='stylesheet' type='text/css' href='style.css'>\n" \
+def build_matchup_notes(html_notes, matchup):
+    notes_box = "<div class='matchup_row'>"
+    for team in ['away', 'home']:
+        notes_box += "<div class='matchup_cell_wrapper {}'><div class='matchup_cell'>".format(team)
+        team_notes = [note for note in html_notes if note['team'] == matchup[team]]
+        if len(team_notes) == 0:
+            notes_box += "No notes"
+        else:
+            for note in team_notes:
+                notes_box += "<div class='{}'> {}</div>".format("good_note" if note['res'] == 'good' else "bad_note",
+                                                                note["note"])
+        notes_box += "</div></div>"
+    notes_box += "</div>"
+    return notes_box
+
+
+def format_html(html_week_number, html_week_matchup, html_teams, data):
+    html_skeleton = "<html>\n<head>\n<meta charset='utf-8'/>\n" \
+                    "<link rel='stylesheet' type='text/css' href='style.css'>\n" \
                     "<script src='Chart.min.js'></script></head>\n<body>\n{}\n</body>\n</html>"
     body_skeleton = "<div id='container'>\n{}</div>\n{}\n"
     window_on_load_vars = ""
@@ -191,8 +208,10 @@ def format_html(html_week_number, html_week_matchup, html_teams, html_league_luc
     body = "<div>\n"
     for matchup in html_week_matchup.matchups:
         body_tmp, on_load_tmp = build_matchup_row(matchup, html_week_matchup.name, html_week_number, html_teams,
-                                                  html_league_luckiness, html_weekly_averages)
+                                                  data['league_luckiness'], data['weekly_averages'])
         body += body_tmp
+        body += build_matchup_notes(data['notes'], matchup)
+        body += "<div class='page_break'></div>"
         window_on_load_vars += on_load_tmp
     body += "</div>\n"
     endscript += "<script>\nwindow.onload = function() {\n"
@@ -208,8 +227,8 @@ def format_prediction_html(html_week_number, html_week_matchup, html_teams):
     return "yay"
 
 
-def generate_weekly_report(week_number, week_matchup, teams, league_luckiness, weekly_averages):
-    html_output = format_html(week_number, week_matchup, teams, league_luckiness, weekly_averages)
+def generate_weekly_report(week_number, week_matchup, teams, data):
+    html_output = format_html(week_number, week_matchup, teams, data)
     # TODO: throws an error if style.css or Chart.min.js is not in /tmp
     if path.exists("/tmp/style.css") and path.exists("/tmp/Chart.min.js"):
         pdfkit.from_string(html_output, "out.pdf", options=pdfkit_options)

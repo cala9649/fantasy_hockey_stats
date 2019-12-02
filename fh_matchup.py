@@ -18,10 +18,11 @@ class Matchup:
         return ret_matchups
 
     def set_date_range(self):
-        first_day_of_week = 7 * (self.id - 1) - 1
-        for i in range(first_day_of_week, first_day_of_week+7):
-            if i >= 0:
-                self.day_numbers.append(i)
+        if self.id <= 22:
+            first_day_of_week = 7 * (self.id - 1) - 1
+            for i in range(first_day_of_week, first_day_of_week+7):
+                if i >= 0:
+                    self.day_numbers.append(i)
 
     def set_matchup_stats(self):
         for day in self.day_numbers:

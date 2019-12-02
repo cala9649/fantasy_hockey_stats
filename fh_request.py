@@ -43,7 +43,7 @@ def cache_helper(url, filename, authenticated=False, verbose=False):
 def get_matchup_scores(try_cache=True):
     if try_cache:
         day = datetime.now()
-        filename = "raw_json/matchup_scores_from_day_{}".format(day.strftime("%d%m%y"))
+        filename = "raw_json/matchup_scores_from_day_{}.json".format(day.strftime("%d%m%y"))
         return cache_helper(matchup_scores_url, filename, authenticated=True)
     else:
         return requests.get(matchup_scores_url, cookies=cookies).json()
@@ -52,7 +52,7 @@ def get_matchup_scores(try_cache=True):
 def get_pro_schedule(try_cache=True):
     if try_cache:
         day = datetime.now()
-        filename = "raw_json/schedule_from_day_{}".format(day.strftime("%d%m%y"))
+        filename = "raw_json/schedule_from_day_{}.json".format(day.strftime("%d%m%y"))
         return cache_helper(pro_team_schedule_url, filename)
     else:
         return requests.get(pro_team_schedule_url).json()
@@ -70,7 +70,7 @@ def get_daily_stats(day, try_cache=True):
 def get_league_info(try_cache=True):
     if try_cache:
         day = datetime.now()
-        filename = "raw_json/league_info_day_{}".format(day.strftime("%d%m%y"))
+        filename = "raw_json/league_info_day_{}.json".format(day.strftime("%d%m%y"))
         return cache_helper(league_base_info_url, filename, authenticated=True)
     else:
         return requests.get(league_base_info_url, cookies=cookies).json()
