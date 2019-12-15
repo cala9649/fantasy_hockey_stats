@@ -9,7 +9,7 @@ def find_weekly_averages(current_matchup_num):
     team_weekly_scores = {'avg': {}}
     for team_num in range(1, 9):    # teams are numbered starting at 1 for some reason
         team_weekly_scores[team_num] = {}
-    for game_num in range(1, current_matchup_num*4):    # games are numbered starting at 1 for some reason
+    for game_num in range(0, current_matchup_num*4):
         for team in ['home', 'away']:
             team_weekly_scores[schedule[game_num][team]['teamId']][game_num] = schedule[game_num][team]['totalPoints']
     for team_num in range(1, 9):    # teams are numbered starting at 1 for some reason
@@ -19,6 +19,18 @@ def find_weekly_averages(current_matchup_num):
         team_weekly_scores['avg'][team_num] = total_pts / current_matchup_num
     return team_weekly_scores
 
+
+def find_matchup_score_difference_history(current_matchup_num):
+    schedule = fh_request.get_matchup_scores()['schedule']
+    weekly_matchup_score_differences = {}
+    for team_num in range(1, 9):    # teams are numbered starting at 1 for some reason
+        weekly_matchup_score_differences[team_num] = {}
+    for game_num in range(0, current_matchup_num*4):
+        weekly_matchup_score_differences[schedule[game_num]['home']['teamId']][game_num] = \
+            schedule[game_num]['home']['totalPoints'] - schedule[game_num]['away']['totalPoints']
+        weekly_matchup_score_differences[schedule[game_num]['away']['teamId']][game_num] = \
+            schedule[game_num]['away']['totalPoints'] - schedule[game_num]['home']['totalPoints']
+    return weekly_matchup_score_differences
 
 def predict_score(team, num_games):
     predicted_total = 0

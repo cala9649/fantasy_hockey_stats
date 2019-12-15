@@ -191,7 +191,7 @@ def build_matchup_notes(html_notes, matchup):
             notes_box += "No notes"
         else:
             for note in team_notes:
-                notes_box += "<div class='{}'> {}</div>".format("good_note" if note['res'] == 'good' else "bad_note",
+                notes_box += "<div class='{}'> {}</div>".format("{}_note".format(note["res"]),
                                                                 note["note"])
         notes_box += "</div></div>"
     notes_box += "</div>"
