@@ -106,6 +106,12 @@ class Team:
                 opt_score_total += self.scores['total'][player]
         return round(opt_score_total, 1)
 
+    def calc_bench_score(self):
+        bench_score = 0
+        for player in self.roster[playerPositions["bench"]]:
+            bench_score += self.scores['total'][player]
+        return round(bench_score, 1)
+
 
 class League:
     def __init__(self):

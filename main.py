@@ -40,6 +40,6 @@ def make_predictions(pred_matchup_num):
 
 
 if __name__ == "__main__":
-    matchup_number = 11
+    matchup_number = 12
     generate_weekly_report(matchup_number)
     # make_predictions(matchup_number)

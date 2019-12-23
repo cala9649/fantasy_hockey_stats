@@ -72,6 +72,13 @@ def build_note(note_str, result, team_id):
 
 def find_notes(league_teams, week_matchup, notes_data):
     notes_list = []
+    bench_scores = []
+    league_mvp_scores = []
+    # Setup league data to use in next loop
+    for team in league_teams:
+        bench_scores.append(team.calc_bench_score())
+        league_mvp_scores.append(team.mvp['score'])
+    # Loop through each team to find individual notes
     for team in league_teams:
         # MVP on the bench
         if team.mvp['player'] in team.bench.keys():
@@ -84,9 +91,9 @@ def find_notes(league_teams, week_matchup, notes_data):
         team_scores_hist = [score for score in notes_data['weekly_averages'][team.id].values()]
         try:
             if team.calc_total_score() >= max(team_scores_hist):
-                notes_list.append(build_note("Highest ever weekly score!", "good", team.id))
+                notes_list.append(build_note("Team Record: Highest ever weekly score!", "good", team.id))
             elif team.calc_total_score() <= min(team_scores_hist):
-                notes_list.append(build_note("Lowest ever weekly score...", "bad", team.id))
+                notes_list.append(build_note("Team Record: Lowest ever weekly score...", "bad", team.id))
         except ValueError:
             pass
         # Team biggest score differential win/loss of the season
@@ -94,9 +101,9 @@ def find_notes(league_teams, week_matchup, notes_data):
                                         notes_data['matchup_score_difference_history'][team.id].values()]
         try:
             if team_score_differential_list[-1] >= max(team_score_differential_list):
-                notes_list.append(build_note("Biggest score margin win this season!", "good", team.id))
+                notes_list.append(build_note("Team Record: Biggest score margin win this season!", "good", team.id))
             elif team_score_differential_list[-1] <= min(team_score_differential_list):
-                notes_list.append(build_note("Worst score deficit loss of the season...", "bad", team.id))
+                notes_list.append(build_note("Team Record: Worst score deficit loss of the season...", "bad", team.id))
         except ValueError:
             pass
         # Team smallest score differential of the season
@@ -104,7 +111,7 @@ def find_notes(league_teams, week_matchup, notes_data):
                                         notes_data['matchup_score_difference_history'][team.id].values()]
         try:
             if team_score_differential_abs_list[-1] == min(team_score_differential_abs_list):
-                notes_list.append(build_note("Closest matchup of the season", "meh", team.id))
+                notes_list.append(build_note("Team Record: Closest matchup of the season", "meh", team.id))
         except:
             pass
         # Played 2 or more injured players
@@ -126,8 +133,8 @@ def find_notes(league_teams, week_matchup, notes_data):
                 note = "{} scored negative points this week ({})".format(player['name'], round(player['score'], 1))
                 notes_list.append(build_note(note, "bad", team.id))
         # Did not play a complete lineup
-        num_players = len([player for player in team.raw_player_data])
-        if num_players < 22:
+        num_rostered_players = len(team.roster[3] + team.roster[4] + team.roster[5] + team.roster[6])
+        if num_rostered_players < 17:
             notes_list.append(build_note("Did not play a complete lineup", "bad", team.id))
         # Find high/low score of the week
         matchup_scores = [team.calc_total_score() for team in league_teams]
@@ -136,7 +143,6 @@ def find_notes(league_teams, week_matchup, notes_data):
         elif team.calc_total_score() == min(matchup_scores):
             notes_list.append(build_note("Lowest score for this matchup", "bad", team.id))
         # League MVP
-        league_mvp_scores = [team.mvp['score'] for team in league_teams]
         if team.mvp['score'] == max(league_mvp_scores):
             notes_list.append(build_note("League MVP ({})".format(team.mvp['player']), "good", team.id))
         # Team's maximum possible score wouldnt have beat opponent
@@ -146,6 +152,11 @@ def find_notes(league_teams, week_matchup, notes_data):
         matchup_opponent_score = league_teams[matchup_opponent_id - 1].calc_total_score()
         if team.calc_opt_total_score() < matchup_opponent_score:
             notes_list.append(build_note("Maximum possible score still wouldn't have won the matchup", "bad", team.id))
+        # Highest bench score
+        bench_score = team.calc_bench_score()
+        if bench_score == max(bench_scores):
+            notes_list.append(build_note("Highest scoring bench of the matchup [{}]".format(bench_score),
+                                         "bad", team.id))
         # Note ideas:
         # Team never held the lead
         # Didn't change lineup
